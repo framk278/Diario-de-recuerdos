@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <title>Subida de Archivos</title>
+</head>
+<body>
+    <div class="container">
+        <h1>Subir Archivos</h1>
+        
+        <!-- Sección para subir imágenes o videos -->
+        <form id="uploadMediaForm">
+            <label for="name">Nombre:</label>
+            <input type="text" id="name" required>
+
+            <label for="mediaFile">Selecciona una imagen o video:</label>
+            <input type="file" id="mediaFile" accept="image/*,video/*" required>
+
+            <button type="submit">Subir Media</button>
+        </form>
+
+        <!-- Sección para subir notas -->
+        <form id="uploadNoteForm">
+            <label for="note">Nota:</label>
+            <textarea id="note" rows="4" required></textarea>
+
+            <button type="submit">Subir Nota</button>
+        </form>
+
+        <div id="uploads">
+            <h2>Subidas Recientes</h2>
+            <ul id="uploadList"></ul>
+        </div>
+    </div>
+
+    <script>
+        // Función para cargar las subidas desde localStorage
+        function loadUploads() {
+            const uploads = JSON.parse(localStorage.getItem('uploads')) || [];
+            uploads.forEach(item => {
+                const listItem = document.createElement('li');
+                if (item.type === 'media') {
+                    const fileURL = item.fileURL;
+                    if (item.fileType.startsWith('image/')) {
+                        listItem.innerHTML = `<strong>${item.name}</strong> subió el ${item.date}.<br><img src="${fileURL}" alt="Imagen" class="preview"><br>`;
+                    } else if (item.fileType.startsWith('video/')) {
+                        listItem.innerHTML = `<strong>${item.name}</strong> subió el ${item.date}.<br><video src="${fileURL}" controls class="preview"></video><br>`;
+                    }
+                } else if (item.type === 'note') {
+                    listItem.innerHTML = `<strong>${item.name}</strong> subió el ${item.date}.<br>${item.note}`;
+                }
+                document.getElementById('uploadList').appendChild(listItem);
+            });
+        }
+
+        // Cargar las subidas al iniciar la página
+        window.onload = loadUploads;
+
+        // Manejar la subida de imágenes o videos
+        document.getElementById('uploadMediaForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const name = document.getElementById('name').value; // Usar el mismo nombre
+            const file = document.getElementById('mediaFile').files[0];
+            const date = new Date().toLocaleString();
+            const fileURL = URL.createObjectURL(file); // Crear URL para el archivo
+
+            const listItem = document.createElement('li');
+
+            // Mostrar imagen o video según el tipo de archivo
+            if (file.type.startsWith('image/')) {
+                listItem.innerHTML = `<strong>${name}</strong> subió el ${date}.<br><img src="${fileURL}" alt="Imagen" class="preview"><br>`;
+            } else if (file.type.startsWith('video/')) {
+                listItem.innerHTML = `<strong>${name}</strong> subió el ${date}.<br><video src="${fileURL}" controls class="preview"></video><br>`;
+            }
+
+            document.getElementById('uploadList').appendChild(listItem);
+
+            // Guardar en localStorage
+            const uploads = JSON.parse(localStorage.getItem('uploads')) || [];
+            uploads.push({ type: 'media', name, date, fileType: file.type, fileURL });
+            localStorage.setItem('uploads', JSON.stringify(uploads));
+
+            // Limpiar el formulario
+            this.reset();
+        });
+
+        // Manejar la subida de notas
+        document.getElementById('uploadNoteForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const name = document.getElementById('name').value; // Usar el mismo nombre
+            const note = document.getElementById('note').value;
+            const date = new Date().toLocaleString();
+
+            const listItem = document.createElement('li');
+            listItem.innerHTML = `<strong>${name}</strong> subió el ${date}.<br>${note}`;
+
+            document.getElementById('uploadList').appendChild(listItem);
+
+            // Guardar en localStorage
+            const uploads = JSON.parse(localStorage.getItem('uploads')) || [];
+            uploads.push({ type: 'note', name, date, note });
+            localStorage.setItem('uploads', JSON.stringify(uploads));
+
+            // Limpiar el formulario
+            this.reset();
+        });
+    </script>
+</body>
+</html>
