@@ -8,7 +8,7 @@ body {
 
 body::before {
     content: "";
-    background-image: url('xddd.webp');
+    background-image: url('xddd.jpg');
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center;
