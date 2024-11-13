@@ -2,16 +2,34 @@ body {
     font-family: Arial, sans-serif;
     background-color: #f4f4f4;
     margin: 0;
-    padding: 20px;
+    padding: 0;
+    position: relative;
+}
+
+body::before {
+    content: "";
+    background-image: url('xddd.webp');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    opacity: 0.5;
+    z-index: -1;
 }
 
 .container {
     max-width: 600px;
     margin: auto;
-    background: white;
-    padding: 20px;
-    border-radius: 5px;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 40px;
+    border-radius: 10px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    position: relative;
+    z-index: 1;
 }
 
 h1, h2 {
