@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="styles.css">
     <title>Subida de Archivos</title>
+    <!-- Agregar Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
 </head>
 <body>
     <div class="container">
@@ -36,22 +40,43 @@
     </div>
 
     <script>
-        // Función para cargar las subidas desde localStorage
+        // Configuración de Firebase
+        const firebaseConfig = {
+    apiKey: "AIzaSyAA9AXU5bYxI9kpKZ0FT7H1IcNLurHSOi0",
+    authDomain: "petworld-97f6a.firebaseapp.com",
+    databaseURL: "https://petworld-97f6a-default-rtdb.firebaseio.com",
+    projectId: "petworld-97f6a",
+    storageBucket: "petworld-97f6a.appspot.com",
+    messagingSenderId: "1067520259109",
+    appId: "1:1067520259109:web:65438fbd2ab5a4292dbbcc",
+    measurementId: "G-T5YN8Z45TE"
+};
+
+        // Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const storage = firebase.storage(); // Inicializar Firebase Storage
+
+        // Función para cargar las subidas desde Firebase
         function loadUploads() {
-            const uploads = JSON.parse(localStorage.getItem('uploads')) || [];
-            uploads.forEach(item => {
-                const listItem = document.createElement('li');
-                if (item.type === 'media') {
-                    const fileURL = item.fileURL;
-                    if (item.fileType.startsWith('image/')) {
-                        listItem.innerHTML = `<strong>${item.name}</strong> subió el ${item.date}.<br><img src="${fileURL}" alt="Imagen" class="preview"><br>`;
-                    } else if (item.fileType.startsWith('video/')) {
-                        listItem.innerHTML = `<strong>${item.name}</strong> subió el ${item.date}.<br><video src="${fileURL}" controls class="preview"></video><br>`;
+            const uploadsRef = database.ref('uploads');
+            uploadsRef.on('value', (snapshot) => {
+                const uploads = snapshot.val() || {};
+                document.getElementById('uploadList').innerHTML = ''; // Limpiar la lista antes de cargar
+                Object.values(uploads).forEach(item => {
+                    const listItem = document.createElement('li');
+                    if (item.type === 'media') {
+                        const fileURL = item.fileURL;
+                        if (item.fileType.startsWith('image/')) {
+                            listItem.innerHTML = `<strong>${item.name}</strong> subió el ${item.date}.<br><img src="${fileURL}" alt="Imagen" class="preview"><br>`;
+                        } else if (item.fileType.startsWith('video/')) {
+                            listItem.innerHTML = `<strong>${item.name}</strong> subió el ${item.date}.<br><video src="${fileURL}" controls class="preview"></video><br>`;
+                        }
+                    } else if (item.type === 'note') {
+                        listItem.innerHTML = `<strong>${item.name}</strong> subió el ${item.date}.<br>${item.note}`;
                     }
-                } else if (item.type === 'note') {
-                    listItem.innerHTML = `<strong>${item.name}</strong> subió el ${item.date}.<br>${item.note}`;
-                }
-                document.getElementById('uploadList').appendChild(listItem);
+                    document.getElementById('uploadList').appendChild(listItem);
+                });
             });
         }
 
@@ -64,26 +89,20 @@
             const name = document.getElementById('name').value; // Usar el mismo nombre
             const file = document.getElementById('mediaFile').files[0];
             const date = new Date().toLocaleString();
-            const fileURL = URL.createObjectURL(file); // Crear URL para el archivo
+            const storageRef = storage.ref(`uploads/${file.name}`); // Crear referencia en Firebase Storage
 
-            const listItem = document.createElement('li');
+            // Subir el archivo a Firebase Storage
+            storageRef.put(file).then((snapshot) => {
+                // Obtener la URL de descarga
+                snapshot.ref.getDownloadURL().then((fileURL) => {
+                    // Guardar en Firebase Realtime Database
+                    const uploadsRef = database.ref('uploads');
+                    uploadsRef.push({ type: 'media', name, date, fileType: file.type, fileURL });
 
-            // Mostrar imagen o video según el tipo de archivo
-            if (file.type.startsWith('image/')) {
-                listItem.innerHTML = `<strong>${name}</strong> subió el ${date}.<br><img src="${fileURL}" alt="Imagen" class="preview"><br>`;
-            } else if (file.type.startsWith('video/')) {
-                listItem.innerHTML = `<strong>${name}</strong> subió el ${date}.<br><video src="${fileURL}" controls class="preview"></video><br>`;
-            }
-
-            document.getElementById('uploadList').appendChild(listItem);
-
-            // Guardar en localStorage
-            const uploads = JSON.parse(localStorage.getItem('uploads')) || [];
-            uploads.push({ type: 'media', name, date, fileType: file.type, fileURL });
-            localStorage.setItem('uploads', JSON.stringify(uploads));
-
-            // Limpiar el formulario
-            this.reset();
+                    // Limpiar el formulario
+                    this.reset();
+                });
+            });
         });
 
         // Manejar la subida de notas
@@ -98,10 +117,9 @@
 
             document.getElementById('uploadList').appendChild(listItem);
 
-            // Guardar en localStorage
-            const uploads = JSON.parse(localStorage.getItem('uploads')) || [];
-            uploads.push({ type: 'note', name, date, note });
-            localStorage.setItem('uploads', JSON.stringify(uploads));
+            // Guardar en Firebase
+            const uploadsRef = database.ref('uploads');
+            uploadsRef.push({ type: 'note', name, date, note });
 
             // Limpiar el formulario
             this.reset();
