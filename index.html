@@ -9,23 +9,167 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
+    <!-- Agregar estilos adicionales para mejorar el diseño -->
+    <style>
+        body {
+            background: linear-gradient(to right, #e9ecef, #f8f9fa); /* Fondo degradado */
+            font-family: 'Arial', sans-serif; /* Fuente más moderna */
+        }
+
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2); /* Sombra más pronunciada */
+            position: relative;
+            z-index: 1;
+        }
+
+        h1 {
+            text-align: center; /* Centrar el título */
+            color: #5cb85c; /* Cambiar el color del título */
+            font-size: 2.5em; /* Aumentar el tamaño del título */
+            margin-bottom: 10px; /* Espacio debajo del título */
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1); /* Sombra de texto */
+        }
+
+        hr {
+            border: 0; /* Quitar el borde por defecto */
+            height: 3px; /* Altura de la línea */
+            background: #5cb85c; /* Color de la línea */
+            margin: 20px 0; /* Espaciado arriba y abajo de la línea */
+            border-radius: 5px; /* Bordes redondeados */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Sombra para la línea */
+        }
+
+        p {
+            font-size: 1.1em; /* Aumentar el tamaño de la fuente */
+            line-height: 1.6; /* Aumentar el espacio entre líneas */
+            color: #555; /* Color del texto */
+            margin-bottom: 20px; /* Espacio debajo del párrafo */
+            padding: 10px; /* Padding alrededor del párrafo */
+            background: rgba(255, 255, 255, 0.8); /* Fondo blanco semitransparente */
+            border-radius: 5px; /* Bordes redondeados */
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Sombra para el párrafo */
+        }
+
+        label {
+            font-weight: bold; /* Hacer las etiquetas en negrita */
+            margin-top: 10px; /* Espacio encima de las etiquetas */
+        }
+
+        input[type="text"],
+        input[type="file"],
+        textarea {
+            width: 100%;
+            padding: 12px; /* Aumentar el padding */
+            margin-bottom: 15px; /* Espacio debajo de los campos */
+            border: 1px solid #ccc;
+            border-radius: 5px; /* Bordes más redondeados */
+            transition: border-color 0.3s; /* Transición en el borde */
+        }
+
+        input[type="text"]:focus,
+        input[type="file"]:focus,
+        textarea:focus {
+            border-color: #5cb85c; /* Cambiar el color del borde al enfocar */
+            outline: none; /* Quitar el contorno por defecto */
+        }
+
+        button {
+            background-color: #5cb85c;
+            color: white;
+            border: none;
+            padding: 12px 20px; /* Aumentar el padding del botón */
+            border-radius: 5px; /* Bordes más redondeados */
+            cursor: pointer;
+            font-size: 1em; /* Aumentar el tamaño de la fuente */
+            transition: background-color 0.3s, transform 0.2s; /* Efecto de transición */
+        }
+
+        button:hover {
+            background-color: #4cae4c; /* Color al pasar el mouse */
+            transform: scale(1.05); /* Efecto de aumento al pasar el mouse */
+        }
+
+        #uploadList {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        #uploadList li {
+            margin: 10px 0; /* Espaciado entre elementos */
+            padding: 10px;
+            background: #f8f9fa; /* Fondo claro para los elementos de la lista */
+            border-radius: 5px; /* Bordes redondeados */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Sombra sutil */
+        }
+
+        .preview {
+            max-width: 100%; /* Ajustar el tamaño de las imágenes */
+            border-radius: 5px; /* Bordes redondeados para las imágenes */
+        }
+
+        /* Estilo para el botón de selección de archivo */
+        .file-upload {
+            position: relative;
+            margin-bottom: 15px; /* Espacio debajo del botón */
+        }
+
+        .file-upload input[type="file"] {
+            position: absolute;
+            top: 0;
+            right: 0;
+            opacity: 0; /* Ocultar el botón de entrada de archivo */
+            height: 100%;
+            width: 100%;
+            cursor: pointer; /* Cambiar el cursor al pasar sobre el área */
+        }
+
+        .custom-button {
+            background-color: #f8f9fa; /* Color de fondo suave */
+            color: #5cb85c; /* Color del texto */
+            border: 1px solid #5cb85c; /* Borde verde */
+            padding: 10px; /* Padding del botón */
+            border-radius: 5px; /* Bordes redondeados */
+            cursor: pointer; /* Cambiar el cursor al pasar sobre el botón */
+            font-size: 1em; /* Tamaño de la fuente */
+            text-align: center; /* Centrar el texto */
+            width: 100%; /* Hacer que el botón ocupe todo el ancho */
+            transition: background-color 0.2s, border-color 0.2s; /* Efecto de transición */
+        }
+
+        .custom-button:hover {
+            background-color: #5cb85c; /* Color al pasar el mouse */
+            color: white; /* Cambiar el color del texto al pasar el mouse */
+            border-color: #5cb85c; /* Mantener el borde verde */
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <h1>Diario de recuerdos</h1>
-        
-        <!-- Sección para subir imágenes o videos -->
+        <hr> <!-- Línea de separación -->
+        <p>La página "Diario de recuerdos" es un espacio interactivo que permite a los usuarios almacenar imágenes, videos y notas, con el objetivo de explorar cómo la memoria a corto plazo procesa y retiene recuerdos. A través de este diario digital, se facilita la reflexión sobre la forma en que percibimos y recordamos los momentos inmediatos, mientras se experimenta el paso del tiempo y los cambios en nuestra memoria.</p>
+        <hr><!-- Explicación para el formulario de subir archivos -->
+        <p>Aquí puedes subir tus recuerdos en forma de imágenes o videos.</p>
         <form id="uploadMediaForm">
             <label for="name">Nombre:</label>
             <input type="text" id="name" required>
 
             <label for="mediaFile">Selecciona una imagen o video:</label>
-            <input type="file" id="mediaFile" accept="image/*,video/*" required>
+            <div class="file-upload">
+                <button type="button" class="custom-button">Seleccionar Archivo</button>
+                <input type="file" id="mediaFile" accept="image/*,video/*" required>
+            </div>
 
             <button type="submit">Subir Media</button>
         </form>
 
-        <!-- Sección para subir notas -->
+        <!-- Explicación para el formulario de subir notas -->
+        <p>Aquí puedes escribir y subir tus notas personales.</p>
         <form id="uploadNoteForm">
             <label for="note">Nota:</label>
             <textarea id="note" rows="4" required></textarea>
